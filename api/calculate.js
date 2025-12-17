@@ -12,22 +12,37 @@ function findColumnKeys(sampleItem) {
     const keys = Object.keys(sampleItem);
     const mapping = {};
 
+    // Procura por colunas que contenham "desc" (Descrição, DESCRIÇÃO, etc.)
     mapping.descKey = keys.find(k => k.toLowerCase().includes('desc')) || null;
+    // Procura por "qtd" ou "quant" (Qtd, Quantidade, etc.)
     mapping.qtdKey = keys.find(k => k.toLowerCase().startsWith('qtd') || k.toLowerCase().includes('quant')) || null;
+    // Procura por "estoque"
     mapping.estoqueKey = keys.find(k => k.toLowerCase().startsWith('estoque')) || null;
     
     return mapping;
 }
 
-// **A GRANDE CORREÇÃO ESTÁ AQUI**
-// Esta função converte qualquer valor para um número, tratando células vazias ou com texto como 0.
+// **A VERSÃO DEFINITIVA E CORRIGIDA DA FUNÇÃO**
+// Limpa e converte qualquer formato numérico (incluindo R$ e vírgulas)
 function parseNumber(value) {
-    // Se o valor for nulo, indefinido ou uma string vazia, retorna 0.
+    // 1. Se o valor for nulo ou vazio, é 0.
     if (value == null || value === "") {
         return 0;
     }
-    const num = Number(value);
-    // Se a conversão resultar em "Não é um Número" (NaN), retorna 0. Senão, retorna o número.
+    // 2. Converte para string para poder limpar.
+    let strValue = String(value);
+
+    // 3. Remove tudo que NÃO é número, vírgula ou sinal de menos.
+    // Isso limpa "R$", espaços, pontos de milhar, etc.
+    strValue = strValue.replace(/[^0-9,-]/g, '');
+
+    // 4. Troca a vírgula do decimal por um ponto. "50,25" -> "50.25"
+    strValue = strValue.replace(',', '.');
+    
+    // 5. Converte a string limpa para um número.
+    const num = parseFloat(strValue);
+    
+    // 6. Se o resultado ainda não for um número, retorna 0 por segurança.
     return isNaN(num) ? 0 : num;
 }
 
@@ -45,8 +60,7 @@ export default async function handler(req, res) {
         const workbook = xlsx.readFile(file.filepath);
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
-        // Adicionando a opção 'defval' para garantir que células vazias sejam lidas como null
-        const data = xlsx.utils.sheet_to_json(worksheet, { defval: null });
+        const data = xlsx.utils.sheet_to_json(worksheet);
 
         if (data.length === 0) {
             return res.status(400).json({ error: 'A planilha parece estar vazia.' });
@@ -55,19 +69,20 @@ export default async function handler(req, res) {
         const keys = findColumnKeys(data[0]);
 
         if (!keys.descKey || !keys.qtdKey || !keys.estoqueKey) {
-             return res.status(400).json({ error: 'Não encontrei as colunas "Descrição", "Qtd" e "Estoque". Verifique os nomes na planilha.' });
+             return res.status(400).json({ error: `ERRO: Não encontrei as colunas obrigatórias. Verifique se sua planilha tem colunas com nomes parecidos com "Descrição", "Qtd" e "Estoque".` });
         }
 
         const processedData = data.map(item => {
-            // **APLICANDO A CORREÇÃO AQUI**
-            const qtd = parseNumber(item[keys.qtdKey]);
-            const estoque = parseNumber(item[keys.estoqueKey]);
             const descricao = item[keys.descKey];
 
-            // Se não houver descrição, pula esta linha.
+            // Se a linha não tiver uma descrição, ela é inválida e será pulada.
             if (!descricao) {
                 return null;
             }
+
+            // **APLICANDO A FUNÇÃO DE LIMPEZA INTELIGENTE AQUI**
+            const qtd = parseNumber(item[keys.qtdKey]);
+            const estoque = parseNumber(item[keys.estoqueKey]);
 
             const consumoMedio = qtd / 7;
             const consumoMax = consumoMedio * 1.4;
@@ -85,12 +100,12 @@ export default async function handler(req, res) {
                 EstoqueMin: Math.ceil(estoqueMinimo),
                 QtdRecomendada: Math.ceil(qtdRecomendada)
             };
-        }).filter(Boolean); // Filtra quaisquer linhas que retornaram 'null'
+        }).filter(Boolean); // Filtra as linhas inválidas que retornaram 'null'
 
         res.status(200).json(processedData);
 
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Falha grave ao processar o arquivo. O formato pode estar incorreto.' });
+        res.status(500).json({ error: 'Falha crítica ao processar o arquivo. O formato pode estar corrompido.' });
     }
 }
