@@ -1,8 +1,10 @@
 body { background:#000; color:#fff; font-family:Arial; }
-.container { width:600px; margin:40px auto; text-align:center; }
-h1 { color:#e50914; margin-bottom:5px; }
-h2 { color:#fff; margin-top:0; }
-button { background:#e50914; border:none; padding:12px;
-color:#fff; cursor:pointer; width:200px; margin-top:20px; }
+.container { width:650px; margin:40px auto; text-align:center; }
+h1 { color:#e50914; margin:0; }
+h2 { margin-top:5px; color:#ccc; }
+button {
+  background:#e50914; border:none; padding:12px;
+  color:#fff; cursor:pointer; width:200px; margin-top:20px;
+}
 table { width:100%; margin-top:20px; border-collapse:collapse; }
 td,th { border:1px solid #444; padding:8px; }
