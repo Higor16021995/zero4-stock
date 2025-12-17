@@ -7,3 +7,12 @@ async function processar(){
   let dados = await resp.json();
   mostrar(dados);
 }
+function mostrar(data){
+  let html = "<table><tr><th>Descrição</th><th>Qtd</th><th>Estoque</th><th>Min</th><th>Comprar</th></tr>";
+  data.forEach(x=>{
+    html += `<tr><td>${x.Descricao}</td><td>${x.Qtd}</td><td>${x.Estoque}</td>
+    <td>${x.EstoqueMin}</td><td>${x.QtdRecomendada}</td></tr>`;
+  });
+  html += "</table>";
+  document.getElementById("result").innerHTML = html;
+}
