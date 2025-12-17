@@ -5,7 +5,7 @@ export const config = { api: { bodyParser: false } };
 
 export default async function handler(req, res) {
   const form = formidable({});
-  form.parse(req, async (err, fields, files) => {
+  form.parse(req, (err, fields, files) => {
     const wb = xlsx.readFile(files.file.filepath);
     const ws = wb.Sheets[wb.SheetNames[0]];
     const data = xlsx.utils.sheet_to_json(ws);
@@ -16,6 +16,7 @@ export default async function handler(req, res) {
       const ss = (cmax - cm) * 2;
       const min = (cm * 2) + ss;
       const comprar = Math.max(0, min - x.Estoque);
+
       return {
         Descricao: x.Descricao,
         Qtd: x.Qtd,
