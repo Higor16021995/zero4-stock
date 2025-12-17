@@ -1,22 +1,30 @@
-import pandas as pd
-from io import BytesIO
+import formidable from "formidable";
+import xlsx from "xlsx";
 
-def handler(request):
-    file = request.files["file"].read()
-    df = pd.read_excel(BytesIO(file))
-    df = df[["Descricao","Qtd","Estoque"]]
-      df["ConsumoMedio"] = df["Qtd"] / 7
-    df["ConsumoMax"] = df["ConsumoMedio"] * 1.4
-    df["Safety"] = (df["ConsumoMax"] - df["ConsumoMedio"]) * 2
-    df["Min"] = (df["ConsumoMedio"] * 2) + df["Safety"]
-    df["Comprar"] = (df["Min"] - df["Estoque"]).clip(lower=0)
-    out = []
-    for _, row in df.iterrows():
-        out.append({
-            "Descricao": row["Descricao"],
-            "Qtd": int(row["Qtd"]),
-            "Estoque": int(row["Estoque"]),
-            "EstoqueMin": round(row["Min"],1),
-            "QtdRecomendada": round(row["Comprar"],1)
-        })
-    return out
+export const config = { api: { bodyParser: false } };
+
+export default async function handler(req, res) {
+  const form = formidable({});
+  form.parse(req, async (err, fields, files) => {
+    const wb = xlsx.readFile(files.file.filepath);
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const data = xlsx.utils.sheet_to_json(ws);
+
+    const out = data.map(x => {
+      const cm = x.Qtd / 7;
+      const cmax = cm * 1.4;
+      const ss = (cmax - cm) * 2;
+      const min = (cm * 2) + ss;
+      const comprar = Math.max(0, min - x.Estoque);
+      return {
+        Descricao: x.Descricao,
+        Qtd: x.Qtd,
+        Estoque: x.Estoque,
+        EstoqueMin: min.toFixed(1),
+        QtdRecomendada: comprar.toFixed(1)
+      };
+    });
+
+    res.status(200).json(out);
+  });
+}
