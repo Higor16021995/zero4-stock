@@ -1,55 +1,60 @@
 async function processar() {
-  const file = document.getElementById("fileInput").files[0];
-  if (!file) {
-    alert("Selecione uma planilha primeiro.");
-    return;
-  }
+    const fileInput = document.getElementById('fileInput');
+    const statusDiv = document.getElementById('status');
+    const resultDiv = document.getElementById('result');
 
-  const form = new FormData();
-  form.append("file", file);
+    if (fileInput.files.length === 0) {
+        statusDiv.innerText = "Ops! Você esqueceu de escolher a planilha.";
+        return;
+    }
 
-  document.getElementById("status").innerHTML = "Processando...";
+    const file = fileInput.files[0];
+    const formData = new FormData();
+    formData.append('file', file);
 
-  try {
-    const resp = await fetch("/api/calculate", {
-      method: "POST",
-      body: form
+    statusDiv.innerText = "Calculando, aguarde um pouquinho...";
+    resultDiv.innerHTML = "";
+
+    try {
+        const response = await fetch('/api/calculate', {
+            method: 'POST',
+            body: formData,
+        });
+
+        if (!response.ok) {
+            throw new Error('A API retornou um erro. Será que a planilha está correta?');
+        }
+
+        const data = await response.json();
+        mostrarTabela(data);
+        statusDiv.innerText = "Prontinho! Aqui está seu resultado:";
+
+    } catch (error) {
+        statusDiv.innerText = "Xiii, deu um problema. Verifique sua planilha e a conexão.";
+        console.error(error);
+    }
+}
+
+function mostrarTabela(data) {
+    const resultDiv = document.getElementById('result');
+    if (data.length === 0) {
+        resultDiv.innerHTML = "<p>Nenhum dado encontrado na planilha para calcular.</p>";
+        return;
+    }
+    
+    let tableHTML = '<table>';
+    tableHTML += '<tr><th>Descrição</th><th>Vendas da Semana</th><th>Estoque Atual</th><th>Estoque Mínimo</th><th>Precisa Comprar</th></tr>';
+
+    data.forEach(item => {
+        tableHTML += `<tr>
+            <td>${item.Descricao}</td>
+            <td>${item.Qtd}</td>
+            <td>${item.Estoque}</td>
+            <td>${item.EstoqueMin}</td>
+            <td><b>${item.QtdRecomendada}</b></td>
+        </tr>`;
     });
 
-    const dados = await resp.json();
-    mostrar(dados);
-
-  } catch (err) {
-    document.getElementById("status").innerHTML = "Erro ao processar.";
-  }
-}
-function mostrar(data) {
-  let html = "<table><tr><th>Descrição</th><th>Vend.</th><th>Estoque</th><th>Mín.</th><th>Comprar</th></tr>";
-  data.forEach(x => {
-    html += `<tr>
-      <td>${x.Descricao}</td>
-      <td>${x.Qtd}</td>
-      <td>${x.Estoque}</td>
-      <td>${x.EstoqueMin}</td>
-      <td>${x.QtdRecomendada}</td>
-    </tr>`;
-  });
-  html += "</table>";
-  document.getElementById("status").innerHTML = "";
-  document.getElementById("result").innerHTML = html;
-}
-function mostrar(data) {
-  let html = "<table><tr><th>Descrição</th><th>Vend.</th><th>Estoque</th><th>Mín.</th><th>Comprar</th></tr>";
-  data.forEach(x => {
-    html += `<tr>
-      <td>${x.Descricao}</td>
-      <td>${x.Qtd}</td>
-      <td>${x.Estoque}</td>
-      <td>${x.EstoqueMin}</td>
-      <td>${x.QtdRecomendada}</td>
-    </tr>`;
-  });
-  html += "</table>";
-  document.getElementById("status").innerHTML = "";
-  document.getElementById("result").innerHTML = html;
+    tableHTML += '</table>';
+    resultDiv.innerHTML = tableHTML;
 }
