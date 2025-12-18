@@ -1,60 +1,28 @@
 body {
-    background-color: #141414;
-    color: #ffffff;
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    margin: 0;
+    background-color: #141414; color: #ffffff; font-family: Arial, sans-serif;
+    display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px 0;
 }
 .container {
-    background-color: #1f1f1f;
-    padding: 30px;
-    border-radius: 8px;
-    text-align: center;
-    width: 90%;
-    max-width: 700px;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    background-color: #1f1f1f; padding: 30px; border-radius: 8px; text-align: center;
+    width: 90%; max-width: 800px; box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
 }
-h1 {
-    color: #e50914;
-    margin: 0;
-}
-h2 {
-    color: #a0a0a0;
-    margin-top: 5px;
-    margin-bottom: 25px;
-}
-input[type="file"] {
-    margin: 20px 0;
-}
+h1 { color: #e50914; margin: 0; }
+h2 { color: #a0a0a0; margin-top: 5px; margin-bottom: 25px; }
+input[type="file"] { margin: 20px 0; }
 button {
-    background-color: #e50914;
-    color: white;
-    border: none;
-    padding: 12px 25px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s;
+    background-color: #e50914; color: white; border: none; padding: 12px 25px;
+    border-radius: 5px; cursor: pointer; font-size: 16px; transition: background-color 0.3s; margin: 5px;
 }
-button:hover {
-    background-color: #f6121d;
-}
-#status {
-    margin-top: 20px;
-    color: #ffb400;
-}
-table {
-    width: 100%;
-    margin-top: 20px;
-    border-collapse: collapse;
-}
-th, td {
-    border: 1px solid #444;
-    padding: 10px;
-}
-th {
-    background-color: #333;
-}
+button:hover { background-color: #f6121d; }
+#exportBtn { background-color: #3e8e41; }
+#exportBtn:hover { background-color: #4caf50; }
+#status { margin-top: 20px; color: #ffb400; }
+table { width: 100%; margin-top: 20px; border-collapse: collapse; }
+th, td { border: 1px solid #444; padding: 10px; text-align: left; }
+th { background-color: #333; }
+/* Estilo para cabeçalho de coluna ordenável */
+.sortable { cursor: pointer; user-select: none; }
+.sortable:hover { background-color: #555; }
+/* Estilo para a linha de item crítico que precisa de compra */
+.item-critico { background-color: #4d3d1e; }
+.totalizador { margin-top: 20px; font-weight: bold; font-size: 1.1em; text-align: right; }
