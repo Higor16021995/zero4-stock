@@ -3,15 +3,17 @@
 <head>
   <title>Zero4 Bebidas - Estoque</title>
   <link rel="stylesheet" href="style.css">
+  <!-- Adicionando a biblioteca para exportar Excel -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 <div class="container">
   <h1>Zero4 Bebidas</h1>
-  <h2>Gestão de Estoque</h2>
-
-  <input type="file" id="fileInput">
-  <button onclick="processar()">Processar</button>
-
+  <h2>Controle de Estoque</h2>
+  <input type="file" id="fileInput" accept=".xlsx,.xls">
+  <button onclick="processar()">Processar Planilha</button>
+  <!-- Botão de exportação, escondido por padrão -->
+  <button id="exportBtn" style="display:none;" onclick="exportarParaExcel()">Exportar Resultado</button>
   <div id="status"></div>
   <div id="result"></div>
 </div>
